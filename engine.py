@@ -1,54 +1,100 @@
-import taichi as ti
-import math
+from OpenGL.GL import * 
+from OpenGL.GL.shaders import compileProgram, compileShader
+import numpy as np
+import pygame as pg
+import sys
 
 
-class Vector2:
-    def __init__(self, x: float = 0, y: float = 0) -> None:
-        self.x = x
-        self.y = y
+# Shaders
+vertex_src = """
+#version 440
+
+layout(location=0) in vec3 vertPos;
+layout(location=1) in vec3 inCol;
+out vec3 outCol;
+
+void main()
+{
+	 gl_Position = vec4(vertPos, 1);
+
+	 outCol = inCol;
+}
+"""
+
+fragment_src = """
+#version 440
+
+in vec3 outCol;
+out vec4 fragCol;
+
+void main()
+{
+	fragCol = vec4(outCol, 1);
+}
+"""
+
+
+class GameWindow:
+    def __init__(self, screen_size: tuple[int, int], framerate_limit: int = 0) -> None:
+        self.screen_size = screen_size
+        print(screen_size)
+        self.framerate_limit = framerate_limit
     
-    def get_tuple(self):
-        return (self.x, self.y)
+    def run(self):
+        # Инициализируем библиотеки
+        pg.init()
+        pg.font.init()
 
-    def __add__(self, other):
-        return Vector2(self.x + other.x, self.y + other.y)
+        # Создаём окно
+        self.screen = pg.display.set_mode(self.screen_size, pg.DOUBLEBUF | pg.OPENGL)
+        pg.display.set_caption("3D game")
+        glClearColor(60/255, 60/255, 60/255, 1)
 
-    def __sub__(self, other):
-        return Vector2(self.x - other.x, self.y - other.y)
-    
-    def __str__(self):
-        return f"({self.x}, {self.y})"
+        # Создаём Clock
+        self.clock = pg.time.Clock()
 
-    def dot(self, other):
-        return self.x * other.x + self.y * other.y
+        triangle = [
+             0,  0.5,  0,  255/255, 0/255, 0/255,
+            -0.5, -0.5,  0,  0/255, 255/255, 0/255,
+             0.5, -0.5,  0,  0/255, 0/255, 255/255]                                                                            
 
-    def distance(self, other):
-        return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
+        triangle = np.array(triangle, dtype=np.float32)
 
+        triangle_buffer = glGenBuffers(1)
 
-class Vector3:
-    def __init__(self, x: float = 0, y: float = 0, z: float = 0) -> None:
-        self.x = x
-        self.y = y
-        self.z = z
-    
-    def get_tuple(self):
-        return (self.x, self.y, self.z)
-    
-    def __add__(self, other):
-        return Vector3(self.x + other.x, self.y + other.y, self.z + other.z)
+        glBindBuffer(GL_ARRAY_BUFFER, triangle_buffer)
 
-    def __sub__(self, other):
-        return Vector3(self.x - other.x, self.y - other.y, self.z - other.z)
-    
-    def __mul__(self, num: float):
-        return Vector3(self.x * num, self.y * num, self.z * num)
+        glBufferData(GL_ARRAY_BUFFER, triangle.nbytes, triangle, GL_STATIC_DRAW)
 
-    def __str__(self):
-        return f"({self.x}, {self.y}, {self.z})"
+        buffer_data = glGetBufferSubData(GL_ARRAY_BUFFER, 0, triangle.nbytes)
+        print(buffer_data.view(dtype=np.float32))
 
-    def dot(self, other):
-        return self.x * other.x + self.y * other.y + self.z * other.z
+        vertex_shader = compileShader(vertex_src, GL_VERTEX_SHADER)
+        fragment_shader = compileShader(fragment_src, GL_FRAGMENT_SHADER)
+        shader_program = compileProgram(vertex_shader, fragment_shader)
 
-    def distance(self, other):
-        return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2)
+        glUseProgram(shader_program)
+
+        glEnableVertexAttribArray(0)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, triangle.itemsize*6, ctypes.c_void_p(0))
+
+        glEnableVertexAttribArray(1)
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, triangle.itemsize*6, ctypes.c_void_p(triangle.itemsize*3))
+
+        # Игровой цикл
+        while True:
+            # Читаем события окна
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    pg.quit()
+                    sys.exit()
+
+            # Очищаем экран
+            glClear(GL_COLOR_BUFFER_BIT)
+
+            glDrawArrays(GL_TRIANGLES, 0, 3)
+
+            # Обновляем окно
+            self.clock.tick(self.framerate_limit)
+            pg.display.flip()
+
