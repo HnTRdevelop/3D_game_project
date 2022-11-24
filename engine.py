@@ -1,100 +1,75 @@
-from OpenGL.GL import * 
-from OpenGL.GL.shaders import compileProgram, compileShader
-import numpy as np
 import pygame as pg
+import numpy as np
+import taichi as ti
+import taichi_glsl as ts
+from taichi_glsl import vec2, vec3, vec4
 import sys
+import math
 
 
-# Shaders
-vertex_src = """
-#version 440
+@ti.data_oriented
+class Shader:
+    def __init__(self, window):
+        self.window = window
+        self.screen_array = np.full((*self.window.screen_size, 3), [0, 0, 0], np.uint8)
 
-layout(location=0) in vec3 vertPos;
-layout(location=1) in vec3 inCol;
-out vec3 outCol;
 
-void main()
-{
-	 gl_Position = vec4(vertPos, 1);
+        self.screen_field = ti.Vector.field(3, ti.uint8, self.window.screen_size)
 
-	 outCol = inCol;
-}
-"""
+    @ti.kernel
+    def render(self, time: ti.float32):
+        # Vertex shader
+        # idk        
+        
+        # Fragment shader
+        for frag_coord in ti.grouped(self.screen_field):
+            uv = frag_coord / self.window.screen_size
+            
+            col = 0.5 + 0.5 * ti.cos(time + vec3(uv.x, uv.y, uv.x) + vec3(0, 2, 4))
+            
+            self.screen_field[frag_coord.x, self.window.screen_size.y - frag_coord.y] = col * 255
 
-fragment_src = """
-#version 440
+    def update(self):
+        time = pg.time.get_ticks() * 1e-03
+        self.render(time)
+        self.screen_array = self.screen_field.to_numpy()
 
-in vec3 outCol;
-out vec4 fragCol;
+    def draw(self):
+        pg.surfarray.blit_array(self.window.screen, self.screen_array)
 
-void main()
-{
-	fragCol = vec4(outCol, 1);
-}
-"""
+    def run(self):
+        self.update()
+        self.draw()
 
 
 class GameWindow:
     def __init__(self, screen_size: tuple[int, int], framerate_limit: int = 0) -> None:
-        self.screen_size = screen_size
-        print(screen_size)
+        ti.init(ti.cuda)
+        pg.init()
+        
+        self.screen_size = vec2(*screen_size)
         self.framerate_limit = framerate_limit
     
     def run(self):
-        # Инициализируем библиотеки
-        pg.init()
-        pg.font.init()
-
-        # Создаём окно
-        self.screen = pg.display.set_mode(self.screen_size, pg.DOUBLEBUF | pg.OPENGL)
+        self.screen = pg.display.set_mode(self.screen_size)
         pg.display.set_caption("3D game")
-        glClearColor(60/255, 60/255, 60/255, 1)
-
-        # Создаём Clock
+        
         self.clock = pg.time.Clock()
 
-        triangle = [
-             0,  0.5,  0,  255/255, 0/255, 0/255,
-            -0.5, -0.5,  0,  0/255, 255/255, 0/255,
-             0.5, -0.5,  0,  0/255, 0/255, 255/255]                                                                            
+        self.shader = Shader(self)
 
-        triangle = np.array(triangle, dtype=np.float32)
-
-        triangle_buffer = glGenBuffers(1)
-
-        glBindBuffer(GL_ARRAY_BUFFER, triangle_buffer)
-
-        glBufferData(GL_ARRAY_BUFFER, triangle.nbytes, triangle, GL_STATIC_DRAW)
-
-        buffer_data = glGetBufferSubData(GL_ARRAY_BUFFER, 0, triangle.nbytes)
-        print(buffer_data.view(dtype=np.float32))
-
-        vertex_shader = compileShader(vertex_src, GL_VERTEX_SHADER)
-        fragment_shader = compileShader(fragment_src, GL_FRAGMENT_SHADER)
-        shader_program = compileProgram(vertex_shader, fragment_shader)
-
-        glUseProgram(shader_program)
-
-        glEnableVertexAttribArray(0)
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, triangle.itemsize*6, ctypes.c_void_p(0))
-
-        glEnableVertexAttribArray(1)
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, triangle.itemsize*6, ctypes.c_void_p(triangle.itemsize*3))
-
-        # Игровой цикл
         while True:
-            # Читаем события окна
+            delta_time = self.clock.get_time() / 1000
+            
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     pg.quit()
                     sys.exit()
 
-            # Очищаем экран
-            glClear(GL_COLOR_BUFFER_BIT)
-
-            glDrawArrays(GL_TRIANGLES, 0, 3)
-
-            # Обновляем окно
+            self.screen.fill((30, 30, 30))
+            
+            self.shader.run()
+            
+            pg.display.set_caption(f"3D game | fps: {int(self.clock.get_fps())}")
             self.clock.tick(self.framerate_limit)
             pg.display.flip()
-
