@@ -1,6 +1,30 @@
-import OpenGL
 import pygame as pg
 from mathf import *
+from OpenGL.GL import *
+from OpenGL.GLU import *
+
+
+class Mesh:
+    def __init__(self, vertices=None, triangles=None):
+        self.vertices = list(vertices) if vertices is not None else list()
+        self.triangles = list(triangles) if triangles is not None else list()
+
+    def from_obj(file_path: str):
+        file = open(file_path)
+
+        verts = []
+        trix = []
+        for string in file.readlines():
+            string = string.split()
+            if string[0] == "v":
+                verts.append(Vector3(float(string[1]), float(string[2]), float(string[3])))
+            if string[0] == "f":
+                for i in range(1, len(string)):
+                    trix.extend(list(map(int, string[i].split("/"))))
+
+        file.close()
+
+        return Mesh(verts, trix)
 
 
 class GameWindow:
@@ -19,9 +43,5 @@ class GameWindow:
                 if event.type == pg.QUIT:
                     pg.quit()
                     quit()
-
-            self.screen.fill((0, 0, 0))
-
-            pg.display.flip()
 
             self.clock.tick(self.max_fps)
