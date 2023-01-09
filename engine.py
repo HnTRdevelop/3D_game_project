@@ -1,30 +1,53 @@
 import pygame as pg
+from pygame.locals import *
 from mathf import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
 
+pg.init()
+
+
 class Mesh:
-    def __init__(self, vertices=None, triangles=None):
+    def __init__(self, vertices=None, triangles=None, edges=None):
         self.vertices = list(vertices) if vertices is not None else list()
         self.triangles = list(triangles) if triangles is not None else list()
+        self.edges = list(edges) if edges is not None else list()
 
-    def from_obj(file_path: str):
-        file = open(file_path)
+    def load_to_opengl_wire(self):
+        glBegin(GL_LINES)
+        for edge in self.edges:
+            glVertex3fv(self.vertices[edge - 1].get_tuple())
+        glEnd()
 
-        verts = []
-        trix = []
-        for string in file.readlines():
-            string = string.split()
-            if string[0] == "v":
-                verts.append(Vector3(float(string[1]), float(string[2]), float(string[3])))
-            if string[0] == "f":
-                for i in range(1, len(string)):
-                    trix.extend(list(map(int, string[i].split("/"))))
+    def load_to_opengl_faces(self):
+        glBegin(GL_TRIANGLES)
+        for tris in self.triangles:
+            glVertex3fv(self.vertices[tris - 1].get_tuple())
+        glEnd()
 
-        file.close()
 
-        return Mesh(verts, trix)
+def from_obj(file_path: str) -> Mesh:
+    file = open(file_path)
+
+    verts = []
+    trix = []
+    edges = []
+    for string in file.readlines():
+        string = string.split()
+        if len(string) == 0:
+            continue
+        if string[0] == "v":
+            verts.append(Vector3(float(string[1]), float(string[2]), float(string[3])))
+        if string[0] == "f":
+            for i in range(1, len(string)):
+                trix.append(int(string[i].split("/")[0]))
+        if string[0] == "l":
+            edges.extend([int(string[1]), int(string[2])])
+
+    file.close()
+
+    return Mesh(verts, trix, edges)
 
 
 class GameWindow:
@@ -35,13 +58,29 @@ class GameWindow:
         self.max_fps = max_fps
 
     def run(self):
-        self.screen = pg.display.set_mode(self.size.get_tuple())
+        self.screen = pg.display.set_mode(self.size.get_tuple(), DOUBLEBUF | OPENGL)
+        gluPerspective(90, (self.size.x / self.size.y), 0.01, 1000.0)
+        glTranslatef(0.0, 0.0, -3)
+
+        mesh = from_obj("monke.obj")
+
+        time = 0
+
         while True:
             delta_time = self.clock.get_time() * 1e-3
+            time += delta_time
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     pg.quit()
                     quit()
 
+            glRotatef(90 * delta_time, 0, 1, 0)
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+            mesh.load_to_opengl_faces()
+
+            pg.display.set_caption(f"Yandex3D | fps: {int(self.clock.get_fps())}")
+            pg.display.flip()
             self.clock.tick(self.max_fps)

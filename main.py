@@ -2,7 +2,7 @@ from engine import *
 
 
 def main():
-    window = GameWindow()
+    window = GameWindow(Vector2(1920, 1080), 0)
 
     window.run()
 
