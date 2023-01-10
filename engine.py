@@ -68,6 +68,7 @@ class GameWindow:
         move_speed = 3
 
         world = from_obj("map.obj")
+        cube = from_obj("edgyasscube.obj")
 
         time = 0
 
@@ -109,6 +110,7 @@ class GameWindow:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
             world.load_to_opengl_faces(camera_pos)
+            cube.load_to_opengl_wire(camera_pos + Vector3(0, 0, 5))
 
             pg.display.set_caption(f"Yandex3D | fps: {int(self.clock.get_fps())}")
             pg.display.flip()
