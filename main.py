@@ -3,6 +3,7 @@ from engine import *
 # Checking git shit numba dos x
 # An one more try :)
 # eche odin test
+# zadolbalsya delat eto
 
 
 def main():
