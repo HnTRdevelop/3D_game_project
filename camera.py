@@ -12,7 +12,7 @@ class Camera:
         self.app = app
         self.aspect_ratio = app.window_size.x / app.window_size.y
 
-        self.position = glm.vec3(2, 2, 3)
+        self.position = glm.vec3(0, 0, 2)
         self.up = glm.vec3(0, 1, 0)
 
         self.view_matrix = self.get_view_matrix()

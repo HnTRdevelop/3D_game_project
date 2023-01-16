@@ -1,19 +1,15 @@
 import numpy as np
 import glm
+from mathf import *
 
 
 class Mesh:
     def __init__(self, app):
+        self.vertices = []
+        self.triangles = []
         self.app = app
         self.glcontext = app.glcontext
-        self.vertices = [(-1, -1, 1), (1, -1, 1), (1, 1, 1), (-1, 1, 1),
-                         (-1, 1, -1), (-1, -1, -1), (1, -1, -1), (1, 1, -1)]
-        self.indices = [(0, 2, 3), (0, 1, 2),
-                        (1, 7, 2), (1, 6, 7),
-                        (6, 5, 4), (4, 7, 6),
-                        (3, 4, 5), (3, 5, 0),
-                        (3, 7, 4), (3, 2, 7),
-                        (0, 6, 1), (0, 5, 6)]
+        self.from_obj("models/monke.obj")
         self.vbo = self.get_vbo()
         self.model_matrix = self.get_model_matrix()
         self.shader_program = self.get_shader_program("default")
@@ -45,7 +41,7 @@ class Mesh:
         return vao
 
     def get_vertex_data(self):
-        vertex_data = self.get_data(self.vertices, self.indices)
+        vertex_data = self.get_data(self.vertices, self.triangles)
         return vertex_data
 
     def get_vbo(self):
@@ -68,6 +64,28 @@ class Mesh:
         return program
 
     @staticmethod
-    def get_data(vertices, indices):
-        data = [vertices[ind] for triangle in indices for ind in triangle]
+    def get_data(vertices, triangles):
+        data = [vertices[ind] for triangle in triangles for ind in triangle]
         return np.array(data, dtype=np.float32)
+
+    def from_obj(self, file_path):
+        file = open(file_path)
+
+        verts = []
+        trix = []
+        for string in file.readlines():
+            string = string.split()
+            if len(string) == 0:
+                continue
+            if string[0] == "v":
+                verts.append(Vector3(float(string[1]), float(string[2]), float(string[3])).get_tuple())
+            if string[0] == "f":
+                triangle = []
+                for i in range(1, len(string)):
+                    triangle.append(int(string[i].split("/")[0]) - 1)
+                trix.append(tuple(triangle))
+
+        file.close()
+
+        self.vertices = verts
+        self.triangles = trix
