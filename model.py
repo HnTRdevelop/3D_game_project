@@ -12,10 +12,10 @@ class Mesh:
         self.texture_coord_data = np.array([], dtype=np.float32)
         self.app = app
         self.glcontext = app.glcontext
-        self.from_obj("models/maz500.obj")
+        self.from_obj("models/cat.obj")
         self.vbo = self.get_vbo()
         self.model_matrix = self.get_model_matrix()
-        self.texture = self.get_texture("textures/blank.png")
+        self.texture = self.get_texture("textures/cat.jpg")
         self.shader_program = self.get_shader_program("default")
         self.vao = self.get_vao()
         self.on_init()
@@ -104,7 +104,10 @@ class Mesh:
                 for i in range(1, len(string)):
                     triangle_data = string[i].split("/")
                     triangle.append(int(triangle_data[0]) - 1)
-                    texture_triangle.append(int(triangle_data[1]) - 1)
+                    if triangle_data[1] != "":
+                        texture_triangle.append(int(triangle_data[1]) - 1)
+                    else:
+                        texture_triangle.append(0)
                 trix.append(tuple(triangle))
                 text_trix.append(tuple(texture_triangle))
             if string[0] == "vt":

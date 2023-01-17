@@ -1,8 +1,10 @@
 from engine import *
+import pygame as pg
 
 
 def main():
-    window = GameWindow((1280, 720), max_fps=0)
+    window = GameWindow((1920, 1080), max_fps=0)
+    pg.display.toggle_fullscreen()
 
     window.run()
 
