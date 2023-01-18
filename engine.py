@@ -5,10 +5,11 @@ import glm
 from model import *
 from camera import *
 from math import *
+from typing import Tuple
 
 
 class GameWindow:
-    def __init__(self, window_size: tuple[int, int] = (800, 600), max_fps: int = 0):
+    def __init__(self, window_size: Tuple[int, int] = (800, 600), max_fps: int = 0):
         pg.init()
 
         self.window_size = window_size
