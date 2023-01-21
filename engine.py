@@ -6,6 +6,7 @@ from model import *
 from camera import *
 from math import *
 from typing import Tuple
+from physics import *
 
 
 class GameWindow:
@@ -50,7 +51,7 @@ class GameWindow:
         pg.display.flip()
 
     def run(self):
-        move_speed = 4
+        move_speed = 15
         sensitivity = 0.03
         while True:
             delta_time = self.clock.get_time() * 1e-3
@@ -72,7 +73,7 @@ class GameWindow:
                 self.camera.translate(-self.camera.right * move_speed * delta_time)
             if pressed_keys[pg.K_SPACE]:
                 self.camera.translate(glm.vec3(0, 1, 0) * move_speed * delta_time)
-            if pressed_keys[pg.K_c]:
+            if pressed_keys[pg.K_c] or pressed_keys[pg.K_LCTRL]:
                 self.camera.translate(glm.vec3(0, -1, 0) * move_speed * delta_time)
 
             self.render()
