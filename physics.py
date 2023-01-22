@@ -115,6 +115,22 @@ class Collider:
                     else:
                         self.vy, another.vy = counting_speed(self.mass, self.vy, another.mass, another.vy,
                                                              chase=False, opposite=False)
+        else:
+            now_range = range(another.x, another.x - another.vx + 2) if another.x < another.x - another.vx else\
+                range(another.x - another.vx, another.x + 2)
+            if self.x - self.vx not in now_range:
+                self.x *= -1
+                return None
+            now_range = range(another.y, another.y - another.vy + 2) if another.y < another.y - another.vy else \
+                range(another.y - another.vy, another.y + 2)
+            if self.y - self.vy not in now_range:
+                self.y *= -1
+                return None
+            now_range = range(another.z, another.z - another.vz + 2) if another.z < another.z - another.vz else \
+                range(another.xz - another.vz, another.z + 2)
+            if self.z - self.vz not in now_range:
+                self.z *= -1
+                return None
 
 
 def counting_speed(m1, v1, m2, v2, chase=False, opposite=False):
