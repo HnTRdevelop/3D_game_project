@@ -58,6 +58,20 @@ class Collider:
                     else:
                         self.vz, another.vz = counting_speed(self.mass, self.vz, another.mass, another.vz,
                                                              chase=False, opposite=True)
+                if self.vy >= 0 and another.vy >= 0 or self.vy <= 0 and another.vy <= 0:
+                    if self.mass * self.vy > another.mass * another.vy:
+                        self.vy, another.vy = counting_speed(self.mass, self.vy, another.mass, another.vy,
+                                                             chase=True, opposite=False)
+                    else:
+                        self.vy, another.vy = counting_speed(self.mass, self.vy, another.mass, another.vy,
+                                                             chase=True, opposite=True)
+                else:
+                    if self.mass * self.vy > another.mass * another.vy:
+                        self.vy, another.vy = counting_speed(self.mass, self.vy, another.mass, another.vy,
+                                                             chase=False, opposite=False)
+                    else:
+                        self.vy, another.vy = counting_speed(self.mass, self.vy, another.mass, another.vy,
+                                                             chase=False, opposite=True)
             else:
                 if self.vx >= 0 and another.vx >= 0 or self.vx <= 0 and another.vx <= 0:
                     if self.mass * self.vx > another.mass * another.vx:
@@ -86,6 +100,20 @@ class Collider:
                                                              chase=False, opposite=True)
                     else:
                         self.vz, another.vz = counting_speed(self.mass, self.vz, another.mass, another.vz,
+                                                             chase=False, opposite=False)
+                if self.vy >= 0 and another.vy >= 0 or self.vy <= 0 and another.vy <= 0:
+                    if self.mass * self.vy > another.mass * another.vy:
+                        self.vy, another.vy = counting_speed(self.mass, self.vy, another.mass, another.vy,
+                                                             chase=True, opposite=True)
+                    else:
+                        self.vy, another.vy = counting_speed(self.mass, self.vy, another.mass, another.vy,
+                                                             chase=True, opposite=False)
+                else:
+                    if self.mass * self.vy > another.mass * another.vy:
+                        self.vy, another.vy = counting_speed(self.mass, self.vy, another.mass, another.vy,
+                                                             chase=False, opposite=True)
+                    else:
+                        self.vy, another.vy = counting_speed(self.mass, self.vy, another.mass, another.vy,
                                                              chase=False, opposite=False)
 
 
