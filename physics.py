@@ -35,16 +35,22 @@ class Collider:
                             if self.mass * self.vx > another.mass * another.vx:
                                 self.vx, another.vx = counting_speed(self.mass, self.vx, another.mass, another.vx,
                                                                      chase=True, opposite=False)
+                            else:
+                                self.vx, another.vx = counting_speed(self.mass, self.vx, another.mass, another.vx,
+                                                                     chase=True, opposite=True)
                         else:
                             if self.mass * self.vx > another.mass * another.vx:
                                 self.vx, another.vx = counting_speed(self.mass, self.x, another.mass, another.vx,
                                                                      chase=False, opposite=False)
+                            else:
+                                self.vx, another.vx = counting_speed(self.mass, self.x, another.mass, another.vx,
+                                                                     chase=False, opposite=True)
 
 
 def counting_speed(m1, v1, m2, v2, chase=False, opposite=False):
     if chase:
+        impulse = m1 * v1 + m2 * v2
         if not opposite:
-            impulse = m1 * v1 + m2 * v2
             need_v2_1 = (3 * m1 * v1 + 2 * m2 * v2 - m1 * v2) / (2 * (m2 + m1))
             need_v2_2 = (2 * m2 * v2 + m1 * (v1 + v2)) / (2 * (m1 + m2))
             if not (need_v2_1 < math.sqrt((m1 * v1 ** 2 + m2 * v2 ** 2) / m2) and need_v2_1 < impulse / m2):
@@ -53,9 +59,18 @@ def counting_speed(m1, v1, m2, v2, chase=False, opposite=False):
                 need_v2 = need_v2_1
             need_v1 = (impulse - m2 * need_v2) / m1
             return need_v1, need_v2
+        else:
+            need_v2_1 = -(2 * m2 * v2 + m1 * v1 + m1 * v2) / (2 * (m2 + m1))
+            need_v2_2 = (m1 * v2 - 3 * m1 * v1 - 2 * m2 * v2) / (2 * (m1 + m2))
+            if not ((need_v2_1 < math.sqrt((m1 * v1 ** 2 + m2 * v2 ** 2) / m2)) and (need_v2_1 > impulse / m2)):
+                need_v2 = need_v2_2
+            else:
+                need_v2 = need_v2_1
+            need_v1 = (impulse - m2 * need_v2) / m1
+            return need_v1, need_v2
     else:
+        impulse = abs(m1 * v1 - m2 * v2)
         if not opposite:
-            impulse = m1 * v1 - m2 * v2
             need_v2_1 = (3 * m1 * v1 - 2 * m2 * v2 - m1 * v2) / (2 * (m1 + m2))
             need_v2_2 = (m1 * v1 - 2 * m2 * v2 - m1 * v2) / (2 * (m1 + m2))
             if not (need_v2_1 < math.sqrt((m1 * v1 ** 2 + m2 * v2 ** 2) / m2) and need_v2_1 < impulse / m2):
@@ -64,3 +79,5 @@ def counting_speed(m1, v1, m2, v2, chase=False, opposite=False):
                 need_v2 = need_v2_1
             need_v1 = (impulse - m2 * need_v2) / m1
             return need_v1, need_v2
+        else:
+            pass
