@@ -1,5 +1,8 @@
+import math
+
+
 class Collider:
-    def __init__(self, x, y, z, vx, vy, vz, mass, static=False):
+    def __init__(self, x, y, z, vx, vy, vz, mass, width, height, length, static=False):
         self.x = x
         self.y = y
         self.z = z
@@ -7,6 +10,9 @@ class Collider:
         self.vy = vy
         self.vz = vz
         self.mass = mass
+        self.width = width
+        self.height = height
+        self.length = length
         self.static = static
 
     def movement(self):
@@ -26,90 +32,22 @@ class Collider:
                 if self.vz == 0:
                     if another.vz == 0:
                         if self.vx > 0 and another.vx >= 0 or self.vx < 0 and another.vx <= 0:
-                            self.vx /= coefficient(self.mass, another.mass)
-                            another.vx *= coefficient(self.mass, another.mass)
+                            self.vx, another.vx = counting_speed(self.mass, self.vx, another.mass, another.vx,
+                                                                 chase=True)
                         else:
-                            if self.vx * self.mass == another.vx * another.mass:
-                                self.vx = -self.vx
-                                another.vx = -another.vx
-                            elif self.vx * self.mass > another.vx * another.mass:
-                                self.vx /= coefficient(self.mass, another.mass)
-                                another.vx *= -coefficient(self.mass, another.mass)
-                            else:
-                                self.vx /= -coefficient(self.mass, another.mass)
-                                another.vx *= coefficient(self.mass, another.mass)
-                    else:
-                        if self.vx > 0 and another.vx > 0 or self.vx > 0 and another.vx > 0:
-                            self.vx /= coefficient(self.mass, another.mass)
-                            self.vy += coefficient(self.mass, another.mass)
-                            another.vx *= coefficient(self.mass, another.mass)
-                            another.vy -= coefficient(self.mass, another.mass)
-                        else:
-                            if self.vx * self.mass == another.vx * another.mass:
-                                self.vx = -self.vx
-                                another.vx = -another.vx
-                                self.vy += coefficient(self.mass, another.mass)
-                                another.vy -= coefficient(self.mass, another.mass)
-                            elif self.vx * self.mass > another.vx * another.mass:
-                                self.vx /= coefficient(self.mass, another.mass)
-                                another.vx *= -coefficient(self.mass, another.mass)
-                                self.vy += coefficient(self.mass, another.mass)
-                                another.vy -= coefficient(self.mass, another.mass)
-                            else:
-                                self.vx /= -coefficient(self.mass, another.mass)
-                                another.vx *= coefficient(self.mass, another.mass)
-                                self.vy += coefficient(self.mass, another.mass)
-                                another.vy -= coefficient(self.mass, another.mass)
-                else:
-                    if another.vz == 0:
-                        if self.vx > 0 and another.vx > 0 or self.vx > 0 and another.vx > 0:
-                            self.vx /= coefficient(self.mass, another.mass)
-                            self.vy -= coefficient(self.mass, another.mass)
-                            another.vx *= coefficient(self.mass, another.mass)
-                            another.vy += coefficient(self.mass, another.mass)
-                        else:
-                            if self.vx * self.mass == another.vx * another.mass:
-                                self.vx = -self.vx
-                                another.vx = -another.vx
-                                self.vy -= coefficient(self.mass, another.mass)
-                                another.vy += coefficient(self.mass, another.mass)
-                            elif self.vx * self.mass > another.vx * another.mass:
-                                self.vx /= coefficient(self.mass, another.mass)
-                                another.vx *= -coefficient(self.mass, another.mass)
-                                self.vy -= coefficient(self.mass, another.mass)
-                                another.vy += coefficient(self.mass, another.mass)
-                            else:
-                                self.vx /= -coefficient(self.mass, another.mass)
-                                another.vx *= coefficient(self.mass, another.mass)
-                                self.vy -= coefficient(self.mass, another.mass)
-                                another.vy += coefficient(self.mass, another.mass)
-                    else:
-                        if self.vx > 0 and another.vx > 0 or self.vx > 0 and another.vx > 0:
-                            self.vx /= coefficient(self.mass, another.mass)
-                            self.vy /= coefficient(self.mass, another.mass)
-                            another.vx *= coefficient(self.mass, another.mass)
-                            another.vy *= coefficient(self.mass, another.mass)
-                        else:
-                            if self.vx * self.mass == another.vx * another.mass:
-                                self.vx = -self.vx
-                                another.vx = -another.vx
-                                if self.vx * self.mass == another.vy * another.mass:
-                                    self.vy = -self.vy
-                                    another.vy = -another.vy
-                                else:
-                                    self.vy += coefficient(self.mass, another.mass)
-                                    another.vy -= coefficient(self.mass, another.mass)
-                            elif self.vx * self.mass > another.vx * another.mass:
-                                self.vx /= coefficient(self.mass, another.mass)
-                                another.vx *= -coefficient(self.mass, another.mass)
-                                self.vy += coefficient(self.mass, another.mass)
-                                another.vy -= coefficient(self.mass, another.mass)
-                            else:
-                                self.vx /= -coefficient(self.mass, another.mass)
-                                another.vx *= coefficient(self.mass, another.mass)
-                                self.vy += coefficient(self.mass, another.mass)
-                                another.vy -= coefficient(self.mass, another.mass)
+                            if self.mass * self.vx > another.mass * another.vx:
+
+                            
 
 
-def coefficient(m1, m2):
-    return (m1 / m2) if (m1 / m2) > 1 else (m2 / m1)
+def counting_speed(m1, v1, m2, v2, chase=False):
+    if chase:
+        impulse = m1 * v1 + m2 * v2
+        need_v2_1 = (3 * m1 * v1 + 2 * m2 * v2 - m1 * v2) / (2 * (m2 + m1))
+        need_v2_2 = (2 * m2 * v2 + m1 * (v1 + v2)) / (2 * (m1 + m2))
+        if not (need_v2_1 < math.sqrt((m1 * v1 ** 2 + m2 * v2 ** 2) / m2) and need_v2_1 < impulse / m2):
+            need_v2 = need_v2_2
+        else:
+            need_v2 = need_v2_1
+        need_v1 = (impulse - m2 * need_v2) / m1
+        return need_v1, need_v2
