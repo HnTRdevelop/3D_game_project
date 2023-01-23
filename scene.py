@@ -22,7 +22,7 @@ class Scene:
 
         for x in range(-20, 21):
             for z in range(-20, 21):
-                self.add_object(Model(app, vao_name="cube", texture_name="grass",
+                self.add_object(Model(app, vao_name="cube", texture_name="wooden_box",
                                       position=glm.vec3(x * 10, 0, z * 10),
                                       scale=glm.vec3(5, 1, 5),
                                       rotation=glm.vec3(0, 0, 0)))
@@ -32,11 +32,10 @@ class Scene:
         self.add_object(Model(app, vao_name="twilight", position=glm.vec3(0, 5.2, 15)), "twilight")
 
     def update(self, delta_time: float):
-        rotation = glm.radians(glm.vec3(0, 15 * delta_time, 0))
-        self.get_object("cat").change_rotation(self.get_object("cat").rotation + rotation)
-        rotation = glm.radians(glm.vec3(0, 90 * delta_time, 0))
-        self.get_object("rainbow").change_rotation(self.get_object("rainbow").rotation + rotation)
-        self.get_object("twilight").change_rotation(self.get_object("twilight").rotation + rotation)
+        rotation = glm.vec3(0, glm.pi() * delta_time, 0)
+        self.get_object("cat").change_rotation(self.get_object("cat").rotation - rotation / 4)
+        self.get_object("rainbow").change_rotation(self.get_object("rainbow").rotation + rotation / 2)
+        self.get_object("twilight").change_rotation(self.get_object("twilight").rotation + rotation / 3)
 
     def render(self):
         for object_key in self.objects.keys():

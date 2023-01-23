@@ -1,9 +1,8 @@
 import glm
 
 
-class BaseModel:
-    def __init__(self, app, vao_name: str,
-                 texture_name: str,
+class Model:
+    def __init__(self, app, vao_name: str, texture_name: str = None,
                  position: glm.vec3 = glm.vec3(0),
                  rotation: glm.vec3 = glm.vec3(0),
                  scale: glm.vec3 = glm.vec3(1)):
@@ -14,9 +13,10 @@ class BaseModel:
         self.app = app
         self.model_matrix = self.get_model_matrix()
         self.texture_name = texture_name
-        self.vao = self.app.mesh.vao.vao_array[vao_name]
+        self.vao = self.app.mesh.vao_controller.vao_array[vao_name]
         self.shader_program = self.vao.program
         self.camera = self.app.camera
+        self.on_init()
 
     def get_model_matrix(self):
         model_matrix = glm.mat4()
@@ -60,11 +60,3 @@ class BaseModel:
         self.rotation = new_rotation
         self.model_matrix = self.get_model_matrix()
 
-
-class Model(BaseModel):
-    def __init__(self, app, vao_name: str, texture_name: str = None,
-                 position: glm.vec3 = glm.vec3(0),
-                 rotation: glm.vec3 = glm.vec3(0),
-                 scale: glm.vec3 = glm.vec3(1)):
-        super().__init__(app, vao_name, texture_name, position, rotation, scale)
-        self.on_init()

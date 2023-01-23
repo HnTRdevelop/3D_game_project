@@ -2,7 +2,7 @@ from vbo import VBOController
 from shader_program import ShaderProgram
 
 
-class VAO:
+class VAOController:
     def __init__(self, glcontext):
         self.glcontext = glcontext
         self.vbo_controller = VBOController(self.glcontext)
