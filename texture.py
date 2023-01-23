@@ -6,7 +6,8 @@ class Texture:
     def __init__(self, glcontext):
         self.glcontext = glcontext
         self.textures = {None: self.get_texture("textures/placeholder.png"),
-                         "wooden_box": self.get_texture("textures/box.jpg")}
+                         "wooden_box": self.get_texture("textures/box.jpg"),
+                         "cat": self.get_texture("textures/cat.jpg")}
 
     def get_texture(self, texture_path):
         texture = pg.image.load(texture_path).convert()
@@ -14,6 +15,11 @@ class Texture:
         texture = self.glcontext.texture(size=texture.get_size(),
                                          components=3,
                                          data=pg.image.tostring(texture, "RGB"))
+
+        texture.filter = (gl.LINEAR_MIPMAP_LINEAR, gl.LINEAR)
+        texture.build_mipmaps()
+        texture.anisotropy = 32.0
+
         return texture
 
     def release_data(self):

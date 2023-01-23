@@ -38,7 +38,6 @@ class GameWindow:
         self.mesh = Mesh(self)
 
         self.scene = Scene(self)
-        self.scene.load()
 
     def check_events(self, delta_time):
         for event in pg.event.get():

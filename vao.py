@@ -11,7 +11,12 @@ class VAO:
             "cube": self.get_vao(
                 self.shader_program.programs["default"],
                 self.vbo_controller.vbo_array["cube"]
-            )}
+            ),
+            "cat": self.get_vao(
+                self.shader_program.programs["default"],
+                self.vbo_controller.vbo_array["cat"]
+            )
+        }
 
     def get_vao(self, shader_program, vbo):
         vao = self.glcontext.vertex_array(shader_program, [(vbo.vbo, vbo.format, *vbo.attributes)])

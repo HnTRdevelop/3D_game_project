@@ -1,9 +1,45 @@
 import numpy as np
 
 
+def from_obj(self, file_path: str):
+    file = open(file_path)
+
+    verts = []
+    trix = []
+    text_verts = []
+    text_trix = []
+    for string in file.readlines():
+        string = string.split()
+        if len(string) == 0:
+            continue
+        if string[0] == "v":
+            verts.append((float(string[1]), float(string[2]), float(string[3])))
+        if string[0] == "f":
+            triangle = []
+            texture_triangle = []
+            for i in range(1, len(string)):
+                triangle_data = string[i].split("/")
+                triangle.append(int(triangle_data[0]) - 1)
+                if triangle_data[1] != "":
+                    texture_triangle.append(int(triangle_data[1]) - 1)
+                else:
+                    texture_triangle.append(0)
+            trix.append(tuple(triangle))
+            text_trix.append(tuple(texture_triangle))
+        if string[0] == "vt":
+            text_verts.append((float(string[1]), float(string[2])))
+
+    file.close()
+
+    self.vertices = verts
+    self.triangles = trix
+    self.texture_vertices = text_verts
+    self.texture_triangles = text_trix
+
+
 class VBOController:
     def __init__(self, glcontext):
-        self.vbo_array = {"cat": CubeVBO(glcontext),
+        self.vbo_array = {"cat": CatVBO(glcontext),
                           "cube": CubeVBO(glcontext)}
 
     def release_data(self):
@@ -43,43 +79,20 @@ class CubeVBO(BaseVBO):
         super().__init__(glcontext)
 
     def get_vertex_data(self):
-        self.from_obj("models/cube.obj")
+        from_obj(self, "models/cube.obj")
         vertex_data = self.get_data(self.vertices, self.triangles)
         texture_coord_data = self.get_data(self.texture_vertices, self.texture_triangles)
         vertex_data = np.hstack([texture_coord_data, vertex_data])
         return vertex_data
 
-    def from_obj(self, file_path: str):
-        file = open(file_path)
 
-        verts = []
-        trix = []
-        text_verts = []
-        text_trix = []
-        for string in file.readlines():
-            string = string.split()
-            if len(string) == 0:
-                continue
-            if string[0] == "v":
-                verts.append((float(string[1]), float(string[2]), float(string[3])))
-            if string[0] == "f":
-                triangle = []
-                texture_triangle = []
-                for i in range(1, len(string)):
-                    triangle_data = string[i].split("/")
-                    triangle.append(int(triangle_data[0]) - 1)
-                    if triangle_data[1] != "":
-                        texture_triangle.append(int(triangle_data[1]) - 1)
-                    else:
-                        texture_triangle.append(0)
-                trix.append(tuple(triangle))
-                text_trix.append(tuple(texture_triangle))
-            if string[0] == "vt":
-                text_verts.append((float(string[1]), float(string[2])))
+class CatVBO(BaseVBO):
+    def __init__(self, glcontext):
+        super().__init__(glcontext)
 
-        file.close()
-
-        self.vertices = verts
-        self.triangles = trix
-        self.texture_vertices = text_verts
-        self.texture_triangles = text_trix
+    def get_vertex_data(self):
+        from_obj(self, "models/cat.obj")
+        vertex_data = self.get_data(self.vertices, self.triangles)
+        texture_coord_data = self.get_data(self.texture_vertices, self.texture_triangles)
+        vertex_data = np.hstack([texture_coord_data, vertex_data])
+        return vertex_data
