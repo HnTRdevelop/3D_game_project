@@ -1,12 +1,13 @@
 import pygame as pg
 import moderngl as gl
 import sys
-import glm
 from model import *
 from camera import *
 from math import *
 from typing import Tuple
-from physics import *
+import physics
+from mesh import *
+from scene import Scene
 
 
 class GameWindow:
@@ -20,7 +21,7 @@ class GameWindow:
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE)
 
-        pg.display.set_mode(self.window_size, flags=pg.OPENGL | pg.DOUBLEBUF)
+        self.screen = pg.display.set_mode(self.window_size, flags=pg.OPENGL | pg.DOUBLEBUF)
 
         pg.event.set_grab(True)
         pg.mouse.set_visible(False)
@@ -34,25 +35,29 @@ class GameWindow:
 
         self.camera = Camera(self)
 
-        self.scene = Mesh(self)
+        self.mesh = Mesh(self)
+
+        self.scene = Scene(self)
+        self.scene.load()
 
     def check_events(self, delta_time):
         for event in pg.event.get():
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
-                self.scene.release_data()
+                self.mesh.release_data()
                 pg.quit()
                 sys.exit()
 
     def render(self):
-        self.glcontext.clear(0.0, 0.0, 0.0)
+        self.glcontext.clear(144 / 255, 203 / 255, 232 / 255)
 
         self.scene.render()
 
         pg.display.flip()
 
     def run(self):
-        move_speed = 15
-        sensitivity = 0.03
+        move_speed = 8
+        sensitivity = 0.007
+
         while True:
             delta_time = self.clock.get_time() * 1e-3
             self.time += delta_time

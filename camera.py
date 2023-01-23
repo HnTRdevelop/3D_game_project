@@ -4,7 +4,7 @@ from math import *
 
 FOV = 90
 NEAR = 0.01
-FAR = 100.0
+FAR = 1000.0
 
 UP = glm.vec3(0, 1, 0)
 DOWN = glm.vec3(0, -1, 0)
@@ -19,7 +19,7 @@ class Camera:
         self.app = app
         self.aspect_ratio = app.window_size[0] / app.window_size[1]
 
-        self.position = glm.vec3(0, 10, 10)
+        self.position = glm.vec3(0, 2, 0)
         self.up = UP
         self.forward = FORWARD
         self.right = RIGHT

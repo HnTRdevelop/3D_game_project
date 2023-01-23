@@ -1,0 +1,13 @@
+
+.idea/3D_game_project.iml
+.idea/misc.xml
+__pycache__/vbo.cpython-310.pyc
+__pycache__/vao.cpython-310.pyc
+__pycache__/texture.cpython-310.pyc
+__pycache__/shader_program.cpython-310.pyc
+__pycache__/scene.cpython-310.pyc
+__pycache__/physics.cpython-310.pyc
+__pycache__/model.cpython-310.pyc
+__pycache__/mesh.cpython-310.pyc
+__pycache__/engine.cpython-310.pyc
+__pycache__/camera.cpython-310.pyc
