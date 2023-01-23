@@ -20,12 +20,12 @@ class Collider:
         self.x += self.vx
         self.y += self.vy
         self.z += self.vz
-        if self.vx >= 1:
-            self.vx -= 1
-        if self.vz >= 1:
-            self.vz -= 1
-        if self.vy <= 0:
-            self.vy += 1
+        # if self.vx >= 1:
+        #     self.vx -= 1
+        # if self.vz >= 1:
+        #     self.vz -= 1
+        # if self.vy <= 0:
+        #     self.vy += 1
 
     def bump(self, another):
         if not another.static:

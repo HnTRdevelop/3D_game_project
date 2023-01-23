@@ -39,7 +39,7 @@ class GameWindow:
 
         self.scene = Scene(self)
 
-    def check_events(self, delta_time):
+    def check_events(self, delta_time: float):
         for event in pg.event.get():
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 self.mesh.release_data()
@@ -66,6 +66,7 @@ class GameWindow:
                                yaw=-mouse_move[0] * sensitivity)
 
             self.check_events(delta_time)
+            self.scene.update(delta_time)
             pressed_keys = pg.key.get_pressed()
             if pressed_keys[pg.K_w]:
                 self.camera.translate(-self.camera.forward * move_speed * delta_time)
