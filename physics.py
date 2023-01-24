@@ -16,6 +16,22 @@ class Collider:
 
         self.static = static
 
+    def get_hired_space(self, x, width, y, height, z,  length):  # Занятое телом место
+        x_space = x, x + width
+        y_space = y, y + height
+        z_space = z, z + length
+        return x_space, y_space, z_space
+
+    def check_meeting(self, another):
+        space1 = self.get_hired_space(self.x, self.width, self.y, self.height, self.z, self.length)
+        space2 = another.get_hired_space(another.x, another.width, another.y, another.height, another.z, another.length)
+        if min(space1[0]) <= max(space2[0]) and min(space2[0]) <= max(space1[0]):
+            if min(space1[1]) <= max(space2[1]) and min(space2[1]) <= max(space1[1]):
+                if min(space1[2]) <= max(space2[2]) and min(space2[2]) <= max(space1[2]):
+                    return True
+        else:
+            return False
+
     def movement(self):
         self.x += self.vx
         self.y += self.vy
