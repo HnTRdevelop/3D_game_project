@@ -1,5 +1,4 @@
-from engine import *
-import pygame as pg
+from engine import GameWindow
 
 
 def main():

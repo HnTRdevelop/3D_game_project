@@ -25,7 +25,7 @@ class Scene:
     def __init__(self, app):
         self.app = app
         self.objects: list[GameObject] = []
-        self.load()
+        self.on_load()
 
     def add_object(self, obj: GameObject) -> GameObject:
         self.objects.append(obj)
@@ -42,11 +42,9 @@ class Scene:
                 return obj
         return None
 
-    def load(self):
-        app = self.app
-
+    def on_load(self):
         cat = self.add_object(GameObject("Cat"))
-        cat.add_component(Model(app, cat, vao_name="cat", texture_name="cat"))
+        cat.add_component(Model(self.app, cat, vao_name="cat", texture_name="cat"))
 
         for x in range(-10, 11):
             for z in range(-10, 11):
@@ -55,7 +53,7 @@ class Scene:
                 floor_chunk = self.add_object(GameObject(f"Floor ({x}, {z})"))
                 floor_chunk.transform.scale = glm.vec3(10, 1, 10)
                 floor_chunk.transform.position = glm.vec3(x * 20, 0, z * 20)
-                floor_chunk.add_component(Model(app, floor_chunk, vao_name="cube", texture_name="wooden_box"))
+                floor_chunk.add_component(Model(self.app, floor_chunk, vao_name="cube", texture_name="wooden_box"))
 
     def update(self, delta_time: float):
         self.get_object_by_id(0).transform.rotate(glm.vec3(0, 90 * delta_time, 0))
