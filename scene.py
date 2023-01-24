@@ -1,46 +1,67 @@
-from model import *
 import glm
+from components import *
+
+
+class GameObject:
+    unique_id = 0
+
+    def __init__(self, name: str = f"GameObject{unique_id}"):
+        GameObject.unique_id += 1
+        self.components = {}
+        self.transform = self.add_component(Transform(self))
+        self.name = name
+
+    def get_component(self, component: str):
+        if component not in self.components.keys():
+            return None
+        return self.components[component]
+
+    def add_component(self, component):
+        self.components[component.name] = component
+        return component
 
 
 class Scene:
     def __init__(self, app):
         self.app = app
-        self.objects = {"heap": []}
+        self.objects: list[GameObject] = []
         self.load()
 
-    def add_object(self, obj, name: str = "heap"):
-        if name == "heap":
-            self.objects["heap"].append(obj)
-        else:
-            self.objects[name] = obj
+    def add_object(self, obj: GameObject) -> GameObject:
+        self.objects.append(obj)
+        return obj
 
-    def get_object(self, name: str) -> Model:
-        return self.objects[name] if name != "heap" else None
+    def get_object_by_id(self, obj_id: int):
+        if 0 <= obj_id < len(self.objects):
+            return self.objects[obj_id]
+        return None
+
+    def get_object_by_name(self, obj_name: str):
+        for obj in self.objects:
+            if obj.name == obj_name:
+                return obj
+        return None
 
     def load(self):
         app = self.app
 
-        for x in range(-20, 21):
-            for z in range(-20, 21):
-                self.add_object(Model(app, vao_name="cube", texture_name="wooden_box",
-                                      position=glm.vec3(x * 10, 0, z * 10),
-                                      scale=glm.vec3(5, 1, 5),
-                                      rotation=glm.vec3(0, 0, 0)))
+        cat = self.add_object(GameObject("Cat"))
+        cat.add_component(Model(app, cat, vao_name="cat", texture_name="cat"))
 
-        self.add_object(Model(app, vao_name="cat", texture_name="cat", position=glm.vec3(0, 1, 0)), "cat")
-        self.add_object(Model(app, vao_name="rainbow_dash", position=glm.vec3(0, 5.2, -15)), "rainbow")
-        self.add_object(Model(app, vao_name="twilight", position=glm.vec3(0, 5.2, 15)), "twilight")
+        for x in range(-10, 11):
+            for z in range(-10, 11):
+                if x == 0 and z == 0:
+                    continue
+                floor_chunk = self.add_object(GameObject(f"Floor ({x}, {z})"))
+                floor_chunk.transform.scale = glm.vec3(10, 1, 10)
+                floor_chunk.transform.position = glm.vec3(x * 20, 0, z * 20)
+                floor_chunk.add_component(Model(app, floor_chunk, vao_name="cube", texture_name="wooden_box"))
 
     def update(self, delta_time: float):
-        rotation = glm.vec3(0, glm.pi() * delta_time, 0)
-        self.get_object("cat").change_rotation(self.get_object("cat").rotation - rotation / 4)
-        self.get_object("rainbow").change_rotation(self.get_object("rainbow").rotation + rotation / 2)
-        self.get_object("twilight").change_rotation(self.get_object("twilight").rotation + rotation / 3)
+        self.get_object_by_id(0).transform.rotate(glm.vec3(0, 90 * delta_time, 0))
 
     def render(self):
-        for object_key in self.objects.keys():
-            if object_key == "heap":
-                for obj in self.objects[object_key]:
-                    obj.render()
-            else:
-                self.objects[object_key].render()
+        for obj in self.objects:
+            model_component = obj.get_component("Model")
+            if model_component is not None:
+                model_component.render()

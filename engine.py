@@ -1,13 +1,14 @@
 import pygame as pg
 import moderngl as gl
 import sys
-from model import *
-from camera import *
+from camera import Camera
 from math import *
 from typing import Tuple
 import physics
-from mesh import *
+from mesh import Mesh
 from scene import Scene
+from resources_loader import load_resources
+import glm
 
 
 class GameWindow:
@@ -36,6 +37,7 @@ class GameWindow:
         self.camera = Camera(self)
 
         self.mesh = Mesh(self)
+        load_resources(self.mesh)
 
         self.scene = Scene(self)
 

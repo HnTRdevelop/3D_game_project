@@ -8,11 +8,15 @@ uniform sampler2D u_texture;
 
 void main()
 {
+    float ambientStrength = 0.1;
     float gamma = 2.2;
 
     vec3 color = texture(u_texture, uv).rgb;
-    color = pow(color, vec3(gamma));
 
+    color = pow(color, vec3(gamma));
     color = pow(color, 1 / vec3(gamma));
+
+    //color = ambientStrength * color;
+
     fragColor = vec4(color, 1.0);
 }

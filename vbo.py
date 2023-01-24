@@ -6,11 +6,6 @@ class VBOController:
         self.glcontext = glcontext
         self.vbo_array = {}
 
-        self.set_vbo("cat", "models/cat.obj")
-        self.set_vbo("cube", "models/cube.obj")
-        self.set_vbo("rainbow_dash", "models/rainbow.obj")
-        self.set_vbo("twilight", "models/twilight.obj")
-
     def release_data(self):
         for vbo in self.vbo_array.values():
             vbo.release_data()
@@ -26,6 +21,8 @@ class VBO:
         self.triangles = []
         self.texture_vertices = []
         self.texture_triangles = []
+        self.normal_vertices = []
+        self.normal_triangles = []
         self.model_path = model_path
         self.vbo = self.get_vbo()
         self.format = "2f 3f"
@@ -55,6 +52,8 @@ class VBO:
         trix = []
         text_verts = []
         text_trix = []
+        norm_verts = []
+        norm_trix = []
         for string in file.readlines():
             string = string.split()
             if len(string) == 0:
@@ -64,17 +63,19 @@ class VBO:
             if string[0] == "f":
                 triangle = []
                 texture_triangle = []
+                normal_triagnle = []
                 for i in range(1, len(string)):
                     triangle_data = string[i].split("/")
                     triangle.append(int(triangle_data[0]) - 1)
-                    if triangle_data[1] != "":
-                        texture_triangle.append(int(triangle_data[1]) - 1)
-                    else:
-                        texture_triangle.append(0)
+                    texture_triangle.append(int(triangle_data[1]) - 1)
+                    normal_triagnle.append(int(triangle_data[2]) - 1)
                 trix.append(tuple(triangle))
                 text_trix.append(tuple(texture_triangle))
+                norm_trix.append(tuple(normal_triagnle))
             if string[0] == "vt":
                 text_verts.append((float(string[1]), float(string[2])))
+            if string[0] == "vn":
+                norm_verts.append((float(string[1]), float(string[2]), float(string[3])))
 
         file.close()
 
@@ -82,6 +83,8 @@ class VBO:
         self.triangles = trix
         self.texture_vertices = text_verts
         self.texture_triangles = text_trix
+        self.normal_vertices = norm_verts
+        self.normal_triangles = norm_trix
 
     def release_data(self):
         self.vbo.release()
