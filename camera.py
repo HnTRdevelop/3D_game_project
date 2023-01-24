@@ -27,7 +27,7 @@ class Camera:
         self.pitch = 0
 
     def get_view_matrix(self):
-        return glm.lookAt(self.position, self.position - self.forward, self.up)
+        return glm.lookAt(self.position, self.position + self.forward, self.up)
 
     def rotate(self, pitch: float = 0, yaw: float = 0):
         self.pitch += pitch
@@ -37,8 +37,8 @@ class Camera:
                                 -sin(radians(self.pitch)),
                                 cos(radians(self.yaw)) * cos(radians(self.pitch)))
         self.forward = glm.normalize(self.forward)
-        self.right = -glm.normalize(glm.cross(self.forward, UP))
-        self.up = -glm.normalize(glm.cross(self.right, self.forward))
+        self.right = glm.normalize(glm.cross(self.forward, UP))
+        self.up = glm.normalize(glm.cross(self.right, self.forward))
 
     def translate(self, translation: glm.vec3):
         self.position += translation
