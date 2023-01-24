@@ -9,6 +9,8 @@ from mesh import Mesh
 from scene import Scene
 from resources_loader import load_resources
 import glm
+from input_manager import Inputs
+from player import Player
 
 
 class GameWindow:
@@ -35,13 +37,15 @@ class GameWindow:
         self.time = 0
 
         self.camera = Camera(self)
+        self.player = Player(self.camera)
 
         self.mesh = Mesh(self)
         load_resources(self.mesh)
 
-        self.scene = Scene(self)
+        self.scene = Scene(self, self.player)
 
     def check_events(self, delta_time: float):
+        Inputs.get_inputs()
         for event in pg.event.get():
             if event.type == pg.QUIT or (event.type == pg.KEYDOWN and event.key == pg.K_ESCAPE):
                 self.mesh.release_data()
@@ -56,32 +60,12 @@ class GameWindow:
         pg.display.flip()
 
     def run(self):
-        move_speed = 8
-        sensitivity = 0.007
-
         while True:
             delta_time = self.clock.get_time() * 1e-3
             self.time += delta_time
 
-            mouse_move = pg.mouse.get_rel()
-            self.camera.rotate(pitch=-mouse_move[1] * sensitivity,
-                               yaw=-mouse_move[0] * sensitivity)
-
             self.check_events(delta_time)
             self.scene.update(delta_time)
-            pressed_keys = pg.key.get_pressed()
-            if pressed_keys[pg.K_w]:
-                self.camera.translate(-self.camera.forward * move_speed * delta_time)
-            if pressed_keys[pg.K_s]:
-                self.camera.translate(self.camera.forward * move_speed * delta_time)
-            if pressed_keys[pg.K_d]:
-                self.camera.translate(self.camera.right * move_speed * delta_time)
-            if pressed_keys[pg.K_a]:
-                self.camera.translate(-self.camera.right * move_speed * delta_time)
-            if pressed_keys[pg.K_SPACE]:
-                self.camera.translate(glm.vec3(0, 1, 0) * move_speed * delta_time)
-            if pressed_keys[pg.K_c] or pressed_keys[pg.K_LCTRL]:
-                self.camera.translate(glm.vec3(0, -1, 0) * move_speed * delta_time)
 
             self.render()
             pg.display.set_caption(f"Yandex3D | {int(1 / (delta_time if delta_time != 0 else 1e-6))}")

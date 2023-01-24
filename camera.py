@@ -19,7 +19,7 @@ class Camera:
         self.app = app
         self.aspect_ratio = app.window_size[0] / app.window_size[1]
         self.projection_matrix = self.get_projection_matrix()
-        self.position = glm.vec3(0, 2, 0)
+        self.position = glm.vec3(0)
         self.up = UP
         self.forward = FORWARD
         self.right = RIGHT

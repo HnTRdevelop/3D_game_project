@@ -22,9 +22,10 @@ class GameObject:
 
 
 class Scene:
-    def __init__(self, app):
+    def __init__(self, app, player):
         self.app = app
         self.objects: list[GameObject] = []
+        self.player = player
         self.on_load()
 
     def add_object(self, obj: GameObject) -> GameObject:
@@ -48,14 +49,13 @@ class Scene:
 
         for x in range(-10, 11):
             for z in range(-10, 11):
-                if x == 0 and z == 0:
-                    continue
                 floor_chunk = self.add_object(GameObject(f"Floor ({x}, {z})"))
                 floor_chunk.transform.scale = glm.vec3(10, 1, 10)
-                floor_chunk.transform.position = glm.vec3(x * 20, 0, z * 20)
+                floor_chunk.transform.position = glm.vec3(x * 20, -1, z * 20)
                 floor_chunk.add_component(Model(self.app, floor_chunk, vao_name="cube", texture_name="wooden_box"))
 
     def update(self, delta_time: float):
+        self.player.update(delta_time)
         self.get_object_by_id(0).transform.rotate(glm.vec3(0, 90 * delta_time, 0))
 
     def render(self):
