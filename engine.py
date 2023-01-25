@@ -2,13 +2,10 @@ import pygame as pg
 import moderngl as gl
 import sys
 from camera import Camera
-from math import *
 from typing import Tuple
-import physics
 from mesh import Mesh
 from scene import Scene
 from resources_loader import load_resources
-import glm
 from input_manager import Inputs
 from player import Player
 

@@ -1,6 +1,5 @@
 import glm
 from components import *
-# from player import Player
 
 
 class GameObject:
