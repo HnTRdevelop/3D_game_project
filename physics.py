@@ -1,4 +1,5 @@
 import math
+import glm
 
 
 class Collider:
@@ -13,8 +14,32 @@ class Collider:
         self.width = width
         self.height = height
         self.length = length
+        self.position = glm.vec3(self.x, self.y, self.z)
 
         self.static = static
+
+    def get_meet_point(self, another):
+        if self.check_meeting(another):
+            space1 = self.get_hired_space(self.x, self.width, self.y, self.height, self.z, self.length)
+            space2 = another.get_hired_space(another.x, another.width, another.y, another.height, another.z,
+                                             another.length)
+            point = glm.vec3()
+            if self.position[0] > another.position[0]:  # Какое тело находится дольше на оси
+                point[0] = self.position[0] - len(range(max(space2[0]), min(space1[0])))
+                # Место Встречи с некоторой погрешностью, что, полагаю, не очень критично
+            else:
+                point[0] = another.position[0] - len(range(max(space1[0]), min(space2[0])))
+            if self.position[1] > another.position[1]:
+                point[1] = self.position[1] - len(range(max(space2[1]), min(space1[1])))
+            else:
+                point[1] = another.position[1] - len(range(max(space1[1]), min(space2[1])))
+            if self.position[2] > another.position[2]:
+                point[2] = self.position[2] - len(range(max(space2[2]), min(space1[2])))
+            else:
+                point[2] = another.position[2] - len(range(max(space1[2]), min(space2[2])))
+            return point
+        else:
+            return None
 
     def get_hired_space(self, x, width, y, height, z,  length):  # Занятое телом место
         x_space = x, x + width
