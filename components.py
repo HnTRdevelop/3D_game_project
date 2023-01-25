@@ -195,9 +195,9 @@ class RigidBody(BaseComponent):
                                                                            chase=False, opposite=False)
         else:
             velocity_angle = glm.normalize(glm.acos(self.velocity))
-            new_velocity = glm.vec3(cos(velocity_angle.x) * sin(velocity_angle.z),
-                                    sin(velocity_angle.y),
-                                    cos(velocity_angle.z) * sin(velocity_angle.x))
+            new_velocity = glm.vec3(cos(-velocity_angle.x) * sin(-velocity_angle.z),
+                                    sin(-velocity_angle.y),
+                                    cos(-velocity_angle.z) * sin(-velocity_angle.x))
 
 
 class Collider(BaseComponent):
