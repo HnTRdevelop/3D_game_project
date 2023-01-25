@@ -1,9 +1,11 @@
 import math
 import glm
+from components import *
 
 
-class Collider:
-    def __init__(self, x, y, z, vx, vy, vz, mass, width, height, length, static=False):
+class Collider(BaseComponent):
+    def __init__(self, x, y, z, vx, vy, vz, mass, width, height, length, owner, static=False):
+        super().__init__('Collider', owner)
         self.x = x
         self.y = y
         self.z = z
@@ -41,7 +43,7 @@ class Collider:
         else:
             return None
 
-    def get_hired_space(self, x, width, y, height, z,  length):  # Занятое телом место
+    def get_hired_space(self, x, width, y, height, z, length):  # Занятое телом место
         x_space = x, x + width
         y_space = y, y + height
         z_space = z, z + length
@@ -61,6 +63,7 @@ class Collider:
         self.x += self.vx
         self.y += self.vy
         self.z += self.vz
+        self.position = glm.vec3(self.x, self.y, self.z)
         # if self.vx >= 1:
         #     self.vx -= 1
         # if self.vz >= 1:
@@ -156,8 +159,9 @@ class Collider:
                     else:
                         self.vy, another.vy = counting_speed(self.mass, self.vy, another.mass, another.vy,
                                                              chase=False, opposite=False)
+            self.position = glm.vec3(self.x, self.y, self.z)
         else:
-            now_range = range(another.x, another.x - another.vx + 2) if another.x < another.x - another.vx else\
+            '''now_range = range(another.x, another.x - another.vx + 2) if another.x < another.x - another.vx else\
                 range(another.x - another.vx, another.x + 2)
             if self.x - self.vx not in now_range:
                 self.x *= -1
@@ -171,6 +175,21 @@ class Collider:
                 range(another.xz - another.vz, another.z + 2)
             if self.z - self.vz not in now_range:
                 self.z *= -1
+                return None'''
+            self.position -= (self.vx, 0, 0)
+            if not self.check_meeting(another):
+                self.vx *= -1
+                self.position = glm.vec3(self.x, self.y, self.z)
+                return None
+            self.position -= (0, self.vy, 0)
+            if not self.check_meeting(another):
+                self.vy *= -1
+                self.position = glm.vec3(self.x, self.y, self.z)
+                return None
+            self.position -= (0, 0, self.vz)
+            if not self.check_meeting(another):
+                self.vz *= -1
+                self.position = glm.vec3(self.x, self.y, self.z)
                 return None
 
 
