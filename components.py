@@ -2,14 +2,14 @@ import glm
 
 
 class BaseComponent:
-    def __init__(self, name, parent):
+    def __init__(self, name, owner):
         self.name = name
-        self.parent = parent
+        self.owner = owner
 
 
 class Transform(BaseComponent):
-    def __init__(self, parent):
-        super().__init__("Transform", parent)
+    def __init__(self, owner):
+        super().__init__("Transform", owner)
         self.position = glm.vec3(0)
         self.rotation = glm.vec3(0)
         self.scale = glm.vec3(1)
@@ -22,8 +22,8 @@ class Transform(BaseComponent):
 
 
 class Model(BaseComponent):
-    def __init__(self, app, parent, vao_name: str, texture_name: str = None):
-        super().__init__("Model", parent)
+    def __init__(self, app, owner, vao_name: str, texture_name: str = None):
+        super().__init__("Model", owner)
         self.texture = None
         self.app = app
         self.texture_name = texture_name
@@ -34,13 +34,13 @@ class Model(BaseComponent):
 
     def get_model_matrix(self):
         model_matrix = glm.mat4()
-        model_matrix = glm.translate(model_matrix, self.parent.transform.position)
+        model_matrix = glm.translate(model_matrix, self.owner.transform.position)
 
-        model_matrix = glm.rotate(model_matrix, self.parent.transform.rotation.x, glm.vec3(1, 0, 0))
-        model_matrix = glm.rotate(model_matrix, self.parent.transform.rotation.y, glm.vec3(0, 1, 0))
-        model_matrix = glm.rotate(model_matrix, self.parent.transform.rotation.z, glm.vec3(0, 0, 1))
+        model_matrix = glm.rotate(model_matrix, self.owner.transform.rotation.x, glm.vec3(1, 0, 0))
+        model_matrix = glm.rotate(model_matrix, self.owner.transform.rotation.y, glm.vec3(0, 1, 0))
+        model_matrix = glm.rotate(model_matrix, self.owner.transform.rotation.z, glm.vec3(0, 0, 1))
 
-        model_matrix = glm.scale(model_matrix, self.parent.transform.scale)
+        model_matrix = glm.scale(model_matrix, self.owner.transform.scale)
 
         return model_matrix
 

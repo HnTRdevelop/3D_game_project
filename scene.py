@@ -1,5 +1,6 @@
 import glm
 from components import *
+# from player import Player
 
 
 class GameObject:
@@ -8,7 +9,9 @@ class GameObject:
     def __init__(self, name: str = f"GameObject{unique_id}"):
         GameObject.unique_id += 1
         self.components = {}
-        self.transform = self.add_component(Transform(self))
+        self.child_array: list[GameObject] = []
+        self.parent: GameObject = None
+        self.transform = self.set_component(Transform(self))
         self.name = name
 
     def get_component(self, component: str):
@@ -16,50 +19,82 @@ class GameObject:
             return None
         return self.components[component]
 
-    def add_component(self, component):
+    def set_component(self, component):
         self.components[component.name] = component
         return component
+
+    def add_child(self, child):
+        self.child_array.append(child)
+        child.parent = self
+
+    def get_child_by_id(self, child_id: int):
+        if 0 <= child_id < len(self.child_array):
+            return self.child_array[child_id]
+        return None
+
+    def get_child_by_name(self, child_name: str):
+        for child in self.child_array:
+            if child.name == child_name:
+                return child
+        return None
+
+    def update(self, delta_time: float):
+        self.update_childs(delta_time)
+
+    def update_childs(self, delta_time: float):
+        for child in self.child_array:
+            child.update(delta_time)
+
+    def render(self):
+        model_component = self.get_component("Model")
+        if model_component is not None:
+            model_component.render()
+        self.render_childs()
+
+    def render_childs(self):
+        for child in self.child_array:
+            child.render()
 
 
 class Scene:
     def __init__(self, app, player):
         self.app = app
-        self.objects: list[GameObject] = []
+        self.game_object_array: list[GameObject] = []
         self.player = player
+        self.add_object(self.player)
         self.on_load()
 
     def add_object(self, obj: GameObject) -> GameObject:
-        self.objects.append(obj)
+        self.game_object_array.append(obj)
         return obj
 
     def get_object_by_id(self, obj_id: int):
-        if 0 <= obj_id < len(self.objects):
-            return self.objects[obj_id]
+        if 0 <= obj_id < len(self.game_object_array):
+            return self.game_object_array[obj_id]
         return None
 
     def get_object_by_name(self, obj_name: str):
-        for obj in self.objects:
+        for obj in self.game_object_array:
             if obj.name == obj_name:
                 return obj
         return None
 
     def on_load(self):
-        cat = self.add_object(GameObject("Cat"))
-        cat.add_component(Model(self.app, cat, vao_name="cat", texture_name="cat"))
+        cat = GameObject("cat")
+        cat.set_component(Model(self.app, cat, "cat", "cat"))
+        self.add_object(cat)
 
-        for x in range(-10, 11):
-            for z in range(-10, 11):
-                floor_chunk = self.add_object(GameObject(f"Floor ({x}, {z})"))
-                floor_chunk.transform.scale = glm.vec3(10, 1, 10)
-                floor_chunk.transform.position = glm.vec3(x * 20, -1, z * 20)
-                floor_chunk.add_component(Model(self.app, floor_chunk, vao_name="cube", texture_name="wooden_box"))
+        cat_child = GameObject("cat_child")
+        cat_child.set_component(Model(self.app, cat_child, "cat", "cat"))
+        cat_child.transform.scale = glm.vec3(.5, .5, .5)
+        cat_child.transform.position = glm.vec3(0, 0, 8)
+        cat.add_child(cat_child)
 
     def update(self, delta_time: float):
         self.player.update(delta_time)
-        self.get_object_by_id(0).transform.rotate(glm.vec3(0, 90 * delta_time, 0))
+        for game_object in self.game_object_array:
+            game_object.update(delta_time)
 
     def render(self):
-        for obj in self.objects:
-            model_component = obj.get_component("Model")
-            if model_component is not None:
-                model_component.render()
+        for obj in self.game_object_array:
+            obj.render()

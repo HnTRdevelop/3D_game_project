@@ -10,8 +10,8 @@ class Player(GameObject):
         super().__init__("Player")
         self.camera = camera
 
-        self.max_speed_ground = 320 / 37.65
-        self.max_speed_air = 30 / 37.65
+        self.max_speed_ground = 320 / 32
+        self.max_speed_air = 30 / 32
         self.max_accel = 10 * self.max_speed_ground
         self.sensitivity = 0.007
         self.camera_height = 1.8
