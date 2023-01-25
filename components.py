@@ -198,6 +198,7 @@ class RigidBody(BaseComponent):
             new_velocity = glm.vec3(cos(-velocity_angle.x) * sin(-velocity_angle.z),
                                     sin(-velocity_angle.y),
                                     cos(-velocity_angle.z) * sin(-velocity_angle.x))
+            self.velocity = new_velocity
 
 
 class Collider(BaseComponent):
