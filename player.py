@@ -10,12 +10,13 @@ class Player(GameObject):
         super().__init__("Player")
         self.camera = camera
 
-        self.max_speed_ground = 320 / 32
-        self.max_speed_air = 30 / 32
+        self.max_speed_ground = 5
+        self.max_speed_air = .25
         self.max_accel = 10 * self.max_speed_ground
-        self.sensitivity = 0.007
+        self.sensitivity = 0.003
         self.camera_height = 1.8
 
+        self.floor = 0
         self.gravity = -9.81
 
         self.velocity = glm.vec3(0)
@@ -33,14 +34,14 @@ class Player(GameObject):
         wishdir = forward * Inputs.pressed_keys[pg.K_w] - forward * Inputs.pressed_keys[pg.K_s]
         wishdir += right * Inputs.pressed_keys[pg.K_d] - right * Inputs.pressed_keys[pg.K_a]
 
-        if self.transform.position.y < 0:
-            self.transform.position.y = 0
+        if self.transform.position.y < self.floor:
+            self.transform.position.y = self.floor
             self.velocity.y = 0
 
         if Inputs.pressed_keys[pg.K_SPACE] and self.transform.position.y == 0:
             self.velocity.y = 4
 
-        if self.transform.position.y == 0:
+        if self.transform.position.y == self.floor:
             self.update_velocity_ground(wishdir, delta_time)
         else:
             self.update_velocity_air(wishdir, delta_time)

@@ -1,6 +1,7 @@
 import glm
 from physics import counting_speed
 from math import *
+import numpy as np
 
 
 class BaseComponent:
@@ -55,14 +56,24 @@ class Model(BaseComponent):
         self.shader_program["view_matrix"].write(self.camera.get_view_matrix())
         self.shader_program["model_matrix"].write(self.get_model_matrix())
 
-    def update(self):
+    def update(self, light_sources_data):
         model_matrix = self.get_model_matrix()
         self.texture.use()
         self.shader_program["view_matrix"].write(self.camera.get_view_matrix())
         self.shader_program["model_matrix"].write(model_matrix)
+        self.shader_program["view_pos"].write(self.camera.position)
 
-    def render(self):
-        self.update()
+        self.shader_program["light_count"] = len(light_sources_data)
+        lights = []
+        colors = []
+        for light_source in light_sources_data:
+            lights.append(light_source[0])
+            colors.append(light_source[1])
+        self.shader_program["light_sources"].write(np.array(lights))
+        self.shader_program["light_colors"].write(np.array(colors))
+
+    def render(self, light_sources_data):
+        self.update(light_sources_data)
         self.vao.render()
 
 

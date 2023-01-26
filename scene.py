@@ -44,21 +44,31 @@ class GameObject:
         for child in self.child_array:
             child.update(delta_time)
 
-    def render(self):
+    def render(self, light_sources_data):
         model_component = self.get_component("Model")
         if model_component is not None:
-            model_component.render()
-        self.render_childs()
+            model_component.render(light_sources_data)
+        self.render_childs(light_sources_data)
 
-    def render_childs(self):
+    def render_childs(self, light_sources_data):
         for child in self.child_array:
-            child.render()
+            child.render(light_sources_data)
+
+
+class LightSource:
+    def __init__(self, position: glm.vec3 = glm.vec3(0), color: glm.vec3 = glm.vec3(1)):
+        self.position = position
+        self.color = color
+
+    def get_light_data(self):
+        return self.position, self.color
 
 
 class Scene:
     def __init__(self, app, player):
         self.app = app
         self.game_object_array: list[GameObject] = []
+        self.light_source_array: list[LightSource] = []
         self.player = player
         self.add_object(self.player)
         self.on_load()
@@ -66,6 +76,15 @@ class Scene:
     def add_object(self, obj: GameObject) -> GameObject:
         self.game_object_array.append(obj)
         return obj
+
+    def add_light_source(self, light_source) -> LightSource:
+        self.light_source_array.append(light_source)
+        return light_source
+
+    def get_light_by_id(self, light_id: int):
+        if 0 <= light_id < len(self.light_source_array):
+            return self.light_source_array[light_id]
+        return None
 
     def get_object_by_id(self, obj_id: int):
         if 0 <= obj_id < len(self.game_object_array):
@@ -79,15 +98,18 @@ class Scene:
         return None
 
     def on_load(self):
-        cat = GameObject("cat")
-        cat.set_component(Model(self.app, cat, "cat", "cat"))
-        self.add_object(cat)
+        app = self.app
 
-        cat_child = GameObject("cat_child")
-        cat_child.set_component(Model(self.app, cat_child, "cat", "cat"))
-        cat_child.transform.scale = glm.vec3(.5, .5, .5)
-        cat_child.transform.position = glm.vec3(0, 0, 8)
-        cat.add_child(cat_child)
+        self.add_light_source(LightSource(glm.vec3(0, 8, 0), glm.vec3(0, 1, 0)))
+        self.add_light_source(LightSource(glm.vec3(0, -12, 0), glm.vec3(1, 0, 0)))
+
+        for x in range(-5, 6):
+            for z in range(-5, 6):
+                cat = GameObject(f"cube({x}, {z})")
+                cat.set_component(Model(app, cat, "cat", "cat"))
+                cat.transform.position = glm.vec3(x * 10, -2, z * 10)
+                cat.transform.scale = glm.vec3(0.5, 0.5, 0.5)
+                self.add_object(cat)
 
     def update(self, delta_time: float):
         self.player.update(delta_time)
@@ -95,5 +117,8 @@ class Scene:
             game_object.update(delta_time)
 
     def render(self):
+        light_sources_data = []
+        for light_source in self.light_source_array:
+            light_sources_data.append(light_source.get_light_data())
         for obj in self.game_object_array:
-            obj.render()
+            obj.render(light_sources_data)

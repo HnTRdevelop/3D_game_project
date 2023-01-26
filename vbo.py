@@ -25,14 +25,15 @@ class VBO:
         self.normal_triangles = []
         self.model_path = model_path
         self.vbo = self.get_vbo()
-        self.format = "2f 3f"
-        self.attributes = ["in_texture_coord", "in_position"]
+        self.format = "3f 2f 3f"
+        self.attributes = ["in_position", "in_texture_coord", "in_normal"]
 
     def get_vertex_data(self):
         self.from_obj(self.model_path)
         vertex_data = self.get_data(self.vertices, self.triangles)
         texture_coord_data = self.get_data(self.texture_vertices, self.texture_triangles)
-        vertex_data = np.hstack([texture_coord_data, vertex_data])
+        lighting_data = self.get_data(self.normal_vertices, self.normal_triangles)
+        vertex_data = np.hstack([vertex_data, texture_coord_data, lighting_data])
         return vertex_data
 
     def get_vbo(self):
