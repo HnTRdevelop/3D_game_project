@@ -205,7 +205,7 @@ class RigidBody(BaseComponent):
                                                                            other.mass, other.velocity.y,
                                                                            chase=False, opposite=False)
         else:
-            velocity_angle = glm.normalize(glm.acos(self.velocity))
+            velocity_angle = glm.acos(self.velocity)
             new_velocity = glm.vec3(cos(-velocity_angle.x) * sin(-velocity_angle.z),
                                     sin(-velocity_angle.y),
                                     cos(-velocity_angle.z) * sin(-velocity_angle.x))
