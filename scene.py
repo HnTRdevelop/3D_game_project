@@ -105,8 +105,8 @@ class Scene:
 
         for x in range(-5, 6):
             for z in range(-5, 6):
-                cat = GameObject(f"cube({x}, {z})")
-                cat.set_component(Model(app, cat, "cat", "cat"))
+                cat = GameObject(f"cat({x}, {z})")
+                cat.set_component(Model(app, cat, "cat_model", "cat_texture"))
                 cat.transform.position = glm.vec3(x * 10, -2, z * 10)
                 cat.transform.scale = glm.vec3(0.5, 0.5, 0.5)
                 self.add_object(cat)

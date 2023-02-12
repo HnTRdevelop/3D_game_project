@@ -14,6 +14,10 @@ class Mesh:
     def set_vbo(self, vbo_name: str, model_path: str):
         self.vao_controller.vbo_controller.set_vbo(vbo_name, model_path)
 
+    def set_3d_model(self, model_name: str, model_path):
+        self.vao_controller.vbo_controller.set_vbo(model_name, model_path)
+        self.vao_controller.set_vao(model_name, "default", model_name)
+
     def set_texture(self, texture_name: str, texture_path: str):
         self.texture_controller.set_texture(texture_name, texture_path)
 
