@@ -1,0 +1,58 @@
+{
+  "name": "Sample",
+  "game_objects": [
+    {
+      "id": 2,
+      "name": "Cube",
+      "child_array": [],
+      "components": [
+        {
+          "type": "Transform",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "type": "Model",
+          "texture_name": "none",
+          "vao_name": "cube"
+        }
+      ]
+    }
+  ],
+  "light_sources": [
+    {
+      "position": [
+        42,
+        24,
+        62
+      ],
+      "color": [
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "player_data": {
+    "position": [
+      0,
+      0,
+      3
+    ],
+    "camera_yaw": 180,
+    "camera_pitch": 0
+  }
+}

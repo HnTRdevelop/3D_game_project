@@ -1,7 +1,10 @@
-def load_resources(mesh):
-    load_3d_model = mesh.set_3d_model
-    load_texture = mesh.set_texture
+class ResourceLoader:
+    load_model = None
+    load_texture = None
 
-    load_3d_model("cat_model", "models/cat.obj")
+    loaded_models = {}
+    loaded_textures = {}
 
-    load_texture("cat_texture", "textures/cat.jpg")
+    def init(mesh):
+        ResourceLoader.load_model = mesh.set_3d_model
+        ResourceLoader.load_texture = mesh.set_texture

@@ -2,12 +2,16 @@ import glm
 from physics import counting_speed
 from math import *
 import numpy as np
+from static_data import StaticData
 
 
 class BaseComponent:
     def __init__(self, name, owner):
         self.name = name
         self.owner = owner
+
+    def get_data_json() -> dict: ...
+    def load_from_json(data, owner): ...
 
 
 class Transform(BaseComponent):
@@ -23,14 +27,31 @@ class Transform(BaseComponent):
     def rotate(self, rotation: glm.vec3):
         self.rotation += glm.radians(rotation)
 
+    def get_data_json(self) -> dict:
+        return {
+            "type": "Transform",
+            "position": self.position.to_tuple(),
+            "rotation": self.rotation.to_tuple(),
+            "scale": self.scale.to_tuple()
+        }
+    
+    def load_from_json(data, owner):
+        transform = Transform(owner)
+        transform.position = glm.vec3(data["position"])
+        transform.rotation = glm.vec3(data["rotation"])
+        transform.scale = glm.vec3(data["scale"])
+
+        return transform
+
 
 class Model(BaseComponent):
-    def __init__(self, app, owner, vao_name: str, texture_name: str = None):
+    def __init__(self, owner, vao_name: str, texture_name: str = "none"):
         super().__init__("Model", owner)
         self.texture = None
-        self.app = app
+        self.app = StaticData.app
         self.texture_name = texture_name
-        self.vao = self.app.mesh.vao_controller.vao_array[vao_name]
+        self.vao_name = vao_name
+        self.vao = self.app.mesh.vao_controller.vao_array[self.vao_name]
         self.shader_program = self.vao.program
         self.camera = self.app.camera
         self.on_init()
@@ -76,182 +97,12 @@ class Model(BaseComponent):
         self.update(light_sources_data)
         self.vao.render()
 
-
-class RigidBody(BaseComponent):
-    def __init__(self, owner, mass: float = 1):
-        super().__init__("RigidBody", owner)
-        self.velocity = glm.vec3(0)
-        self.angular_velocity = glm.vec3(0)
-        self.mass = mass
-        collider_component: Collider = self.owner.get_component("Collider")
-        if collider_component in None:
-            raise Exception("'RigidBody' component can't be created without 'Collider' component")
-        self.collider = collider_component
-
-    def move(self, delta_time: float):
-        self.owner.transform.position += self.velocity * delta_time
-        self.owner.transform.rotation += self.angular_velocity * delta_time
-
-    def bump(self, other):
-        if not other.static:
-            if self.mass >= other.mass:
-                if self.velocity.x >= 0 and other.velocity.x >= 0 or self.velocity.x <= 0 and other.velocity.x <= 0:
-                    if self.mass * self.velocity.x > other.mass * other.velocity.x:
-                        self.velocity.x, other.velocity.x = counting_speed(self.mass, self.velocity.x,
-                                                                           other.mass, other.velocity.x,
-                                                                           chase=True, opposite=False)
-                    else:
-                        self.velocity.x, other.velocity.x = counting_speed(self.mass, self.velocity.x,
-                                                                           other.mass, other.velocity.x,
-                                                                           chase=True, opposite=True)
-                else:
-                    if self.mass * self.velocity.x > other.mass * other.velocity.x:
-                        self.velocity.x, other.velocity.x = counting_speed(self.mass, self.x, other.mass,
-                                                                           other.velocity.x,
-                                                                           chase=False, opposite=False)
-                    else:
-                        self.velocity.x, other.velocity.x = counting_speed(self.mass, self.x, other.mass,
-                                                                           other.velocity.x,
-                                                                           chase=False, opposite=True)
-                if self.velocity.z >= 0 and other.velocity.z >= 0 or self.velocity.z <= 0 and other.velocity.z <= 0:
-                    if self.mass * self.velocity.z > other.mass * other.velocity.z:
-                        self.velocity.z, other.velocity.z = counting_speed(self.mass, self.velocity.z,
-                                                                           other.mass, other.velocity.z,
-                                                                           chase=True, opposite=False)
-                    else:
-                        self.velocity.z, other.velocity.z = counting_speed(self.mass, self.velocity.z,
-                                                                           other.mass, other.velocity.z,
-                                                                           chase=True, opposite=True)
-                else:
-                    if self.mass * self.velocity.z > other.mass * other.velocity.z:
-                        self.velocity.z, other.velocity.z = counting_speed(self.mass, self.velocity.z,
-                                                                           other.mass, other.velocity.z,
-                                                                           chase=False, opposite=False)
-                    else:
-                        self.velocity.z, other.velocity.z = counting_speed(self.mass, self.velocity.z,
-                                                                           other.mass, other.velocity.z,
-                                                                           chase=False, opposite=True)
-                if self.velocity.y >= 0 and other.velocity.y >= 0 or self.velocity.y <= 0 and other.velocity.y <= 0:
-                    if self.mass * self.velocity.y > other.mass * other.velocity.y:
-                        self.velocity.y, other.velocity.y = counting_speed(self.mass, self.velocity.y,
-                                                                           other.mass, other.velocity.y,
-                                                                           chase=True, opposite=False)
-                    else:
-                        self.velocity.y, other.velocity.y = counting_speed(self.mass, self.velocity.y,
-                                                                           other.mass, other.velocity.y,
-                                                                           chase=True, opposite=True)
-                else:
-                    if self.mass * self.velocity.y > other.mass * other.velocity.y:
-                        self.velocity.y, other.velocity.y = counting_speed(self.mass, self.velocity.y,
-                                                                           other.mass, other.velocity.y,
-                                                                           chase=False, opposite=False)
-                    else:
-                        self.velocity.y, other.velocity.y = counting_speed(self.mass, self.velocity.y,
-                                                                           other.mass, other.velocity.y,
-                                                                           chase=False, opposite=True)
-            else:
-                if self.velocity.x >= 0 and other.velocity.x >= 0 or self.velocity.x <= 0 and other.velocity.x <= 0:
-                    if self.mass * self.velocity.x > other.mass * other.velocity.x:
-                        self.velocity.x, other.velocity.x = counting_speed(self.mass, self.velocity.x,
-                                                                           other.mass, other.velocity.x,
-                                                                           chase=True, opposite=True)
-                    else:
-                        self.velocity.x, other.velocity.x = counting_speed(self.mass, self.velocity.x,
-                                                                           other.mass, other.velocity.x,
-                                                                           chase=True, opposite=False)
-                else:
-                    if self.mass * self.velocity.x > other.mass * other.velocity.x:
-                        self.velocity.x, other.velocity.x = counting_speed(self.mass, self.x,
-                                                                           other.mass, other.velocity.x,
-                                                                           chase=False, opposite=True)
-                    else:
-                        self.velocity.x, other.velocity.x = counting_speed(self.mass, self.x,
-                                                                           other.mass, other.velocity.x,
-                                                                           chase=False, opposite=False)
-                if self.velocity.z >= 0 and other.velocity.z >= 0 or self.velocity.z <= 0 and other.velocity.z <= 0:
-                    if self.mass * self.velocity.z > other.mass * other.velocity.z:
-                        self.velocity.z, other.velocity.z = counting_speed(self.mass, self.velocity.z,
-                                                                           other.mass, other.velocity.z,
-                                                                           chase=True, opposite=True)
-                    else:
-                        self.velocity.z, other.velocity.z = counting_speed(self.mass, self.velocity.z,
-                                                                           other.mass, other.velocity.z,
-                                                                           chase=True, opposite=False)
-                else:
-                    if self.mass * self.velocity.z > other.mass * other.velocity.z:
-                        self.velocity.z, other.velocity.z = counting_speed(self.mass, self.velocity.z,
-                                                                           other.mass, other.velocity.z,
-                                                                           chase=False, opposite=True)
-                    else:
-                        self.velocity.z, other.velocity.z = counting_speed(self.mass, self.velocity.z,
-                                                                           other.mass, other.velocity.z,
-                                                                           chase=False, opposite=False)
-                if self.velocity.y >= 0 and other.velocity.y >= 0 or self.velocity.y <= 0 and other.velocity.y <= 0:
-                    if self.mass * self.velocity.y > other.mass * other.velocity.y:
-                        self.velocity.y, other.velocity.y = counting_speed(self.mass, self.velocity.y,
-                                                                           other.mass, other.velocity.y,
-                                                                           chase=True, opposite=True)
-                    else:
-                        self.velocity.y, other.velocity.y = counting_speed(self.mass, self.velocity.y,
-                                                                           other.mass, other.velocity.y,
-                                                                           chase=True, opposite=False)
-                else:
-                    if self.mass * self.velocity.y > other.mass * other.velocity.y:
-                        self.velocity.y, other.velocity.y = counting_speed(self.mass, self.velocity.y,
-                                                                           other.mass, other.velocity.y,
-                                                                           chase=False, opposite=True)
-                    else:
-                        self.velocity.y, other.velocity.y = counting_speed(self.mass, self.velocity.y,
-                                                                           other.mass, other.velocity.y,
-                                                                           chase=False, opposite=False)
-        else:
-            velocity_angle = glm.acos(self.velocity)
-            new_velocity = glm.vec3(cos(-velocity_angle.x) * sin(-velocity_angle.z),
-                                    sin(-velocity_angle.y),
-                                    cos(-velocity_angle.z) * sin(-velocity_angle.x))
-            self.velocity = new_velocity
-
-
-class Collider(BaseComponent):
-    def __init__(self, owner, scale: glm.vec3 = glm.vec3(1), static: bool = False):
-        super().__init__("Collider", owner)
-        self.scale = scale
-        self.static = static
-
-    def get_meet_point(self, other):
-        if self.check_meeting(other):
-            self_space = self.get_hired_space()
-            other_space = other.get_hired_space()
-            point = glm.vec3(0)
-            if self.owner.transform.position.x > other.owner.transform.position.x:  # Какое тело находится дольше на оси
-                point.x = self.owner.transform.position.x - len(range(max(other_space[0]), min(self_space[0])))
-                # Место Встречи с некоторой погрешностью, что, полагаю, не очень критично
-            else:
-                point.x = other.owner.transform.position.x - len(range(max(self_space[0]), min(other_space[0])))
-            if self.owner.transform.position.y > other.owner.transform.position.y:
-                point.y = self.owner.transform.position.y - len(range(max(other_space[1]), min(self_space[1])))
-            else:
-                point.y = other.owner.transform.position.y - len(range(max(self_space[1]), min(other_space[1])))
-            if self.owner.transform.position.z > other.owner.transform.position.z:
-                point.z = self.owner.transform.position.z - len(range(max(other_space[2]), min(self_space[2])))
-            else:
-                point.z = other.owner.transform.position.z - len(range(max(self_space[2]), min(other_space[2])))
-            return point
-        else:
-            return None
-
-    def get_hired_space(self):  # Занятое телом место
-        x_space = self.owner.transform.position.x, self.owner.transform.position.x + self.scale.x
-        y_space = self.owner.transform.position.y, self.owner.transform.position.y + self.scale.y
-        z_space = self.owner.transform.position.z, self.owner.transform.position.z + self.scale.z
-        return x_space, y_space, z_space
-
-    def check_meeting(self, other):
-        self_space = self.get_hired_space()
-        other_space = other.get_hired_space()
-        if min(self_space[0]) <= max(other_space[0]) and min(other_space[0]) <= max(self_space[0]):
-            if min(self_space[1]) <= max(other_space[1]) and min(other_space[1]) <= max(self_space[1]):
-                if min(self_space[2]) <= max(other_space[2]) and min(other_space[2]) <= max(self_space[2]):
-                    return True
-        else:
-            return False
+    def get_data_json(self) -> dict:
+        return {
+            "type": "Model",
+            "texture_name": self.texture_name,
+            "vao_name": self.vao_name
+        }
+    
+    def load_from_json(data, owner):
+        return Model(owner, data["vao_name"], data["texture_name"])

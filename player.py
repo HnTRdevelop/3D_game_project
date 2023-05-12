@@ -12,7 +12,7 @@ class Player(GameObject):
 
         self.move_speed = 5
         self.sensitivity = 0.003
-        self.camera_height = 1.8
+        self.camera_height = 0.0
 
     def update(self, delta_time: float):
         self.camera.rotate(pitch=Inputs.mouse_move.y * self.sensitivity,

@@ -5,17 +5,25 @@ from camera import Camera
 from typing import Tuple
 from mesh import Mesh
 from scene import Scene
-from resources_loader import load_resources
 from input_manager import Inputs
 from player import Player
+from resources_loader import ResourceLoader
+from static_data import StaticData
 
 
 class GameWindow:
-    def __init__(self, window_size: Tuple[int, int] = (800, 600), max_fps: int = 0):
+    def __init__(self, 
+                 window_size: Tuple[int, int] = (800, 600), 
+                 max_fps: int = 0, 
+                 title: str = "GameWindow", 
+                 show_fps: bool = False):
         pg.init()
+        StaticData.app = self
 
         self.window_size = window_size
         self.max_fps = max_fps
+        self.title = title
+        self.show_fps = show_fps
 
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
@@ -37,9 +45,10 @@ class GameWindow:
         self.player = Player(self.camera)
 
         self.mesh = Mesh(self)
-        load_resources(self.mesh)
 
-        self.scene = Scene(self, self.player)
+        ResourceLoader.init(self.mesh)
+
+        self.scene = Scene("BasicScene")
 
     def check_events(self, delta_time: float):
         Inputs.get_inputs()
@@ -62,8 +71,16 @@ class GameWindow:
             self.time += delta_time
 
             self.check_events(delta_time)
-            self.scene.update(delta_time)
+            self.scene._update(delta_time)
 
             self.render()
-            pg.display.set_caption(f"Yandex3D | {int(1 / (delta_time if delta_time != 0 else 1e-6))}")
+            t = self.title + (" | " + str(int(1 / (delta_time if delta_time != 0 else 1e-6))) if self.show_fps else "")
+            pg.display.set_caption(t)
             self.clock.tick(self.max_fps)
+
+    def change_scene(self, new_scene: Scene) -> Scene:
+        self.scene = new_scene
+        return self.scene
+
+    def get_player(self):
+        return self.player
