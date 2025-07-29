@@ -1,5 +1,4 @@
 import glm
-from physics import counting_speed
 from math import *
 import numpy as np
 from static_data import StaticData
@@ -26,6 +25,9 @@ class Transform(BaseComponent):
 
     def rotate(self, rotation: glm.vec3):
         self.rotation += glm.radians(rotation)
+    
+    def rescale(self, new_scale: glm.vec3):
+        self.scale = new_scale
 
     def get_data_json(self) -> dict:
         return {
@@ -85,11 +87,11 @@ class Model(BaseComponent):
         self.shader_program["view_pos"].write(self.camera.position)
 
         self.shader_program["light_count"] = len(light_sources_data)
-        lights = []
-        colors = []
-        for light_source in light_sources_data:
-            lights.append(light_source[0])
-            colors.append(light_source[1])
+        lights = [glm.vec3(0) for _ in range(128)]
+        colors = [glm.vec3(0) for _ in range(128)]
+        for i in range(len(light_sources_data)):
+            lights[i] = light_sources_data[i][0]
+            colors[i] = light_sources_data[i][1]
         self.shader_program["light_sources"].write(np.array(lights))
         self.shader_program["light_colors"].write(np.array(colors))
 
@@ -106,3 +108,7 @@ class Model(BaseComponent):
     
     def load_from_json(data, owner):
         return Model(owner, data["vao_name"], data["texture_name"])
+
+    def update_texture(self, texture_name):
+        self.texture_name = texture_name
+        self.on_init()

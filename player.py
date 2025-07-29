@@ -11,7 +11,7 @@ class Player(GameObject):
         self.camera = camera
 
         self.move_speed = 5
-        self.sensitivity = 0.003
+        self.sensitivity = 0.03
         self.camera_height = 0.0
 
     def update(self, delta_time: float):
@@ -26,7 +26,7 @@ class Player(GameObject):
 
         wishdir = forward * Inputs.pressed_keys[pg.K_w] - forward * Inputs.pressed_keys[pg.K_s]
         wishdir += right * Inputs.pressed_keys[pg.K_d] - right * Inputs.pressed_keys[pg.K_a]
-        wishdir += up * Inputs.pressed_keys[pg.K_SPACE] - up * Inputs.pressed_keys[pg.K_c]
+        wishdir += up * Inputs.pressed_keys[pg.K_e] - up * Inputs.pressed_keys[pg.K_q]
 
         self.transform.translate(wishdir * self.move_speed * delta_time)
         self.camera.position = self.transform.position + glm.vec3(0, self.camera_height, 0)

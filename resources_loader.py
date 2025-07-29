@@ -8,3 +8,4 @@ class ResourceLoader:
     def init(mesh):
         ResourceLoader.load_model = mesh.set_3d_model
         ResourceLoader.load_texture = mesh.set_texture
+        ResourceLoader.load_texture("none", "textures/placeholder.png")
